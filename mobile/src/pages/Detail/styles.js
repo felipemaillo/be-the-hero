@@ -23,7 +23,7 @@ export default StyleSheet.create({
     },
 
     incidentProperty: {
-        fontSize: 14,
+        fontSize: 15,
         color: '#41414d',
         fontWeight: 'bold',
         marginTop: 24
@@ -31,7 +31,7 @@ export default StyleSheet.create({
 
     incidentValue: {
         marginTop: 8,
-        fontSize: 15,
+        fontSize: 14,
         color: '#737380'
     },
 

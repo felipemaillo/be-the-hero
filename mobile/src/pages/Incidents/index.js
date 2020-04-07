@@ -11,14 +11,31 @@ export default function Incidents() {
     const [total, setTotal] = useState(0);
     const navigation = useNavigation();
 
-    function navigationToDetail() {
-        navigation.navigate('Detail');
+    /* auto refresh ao chegar no final da list */
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+
+    function navigationToDetail(incident) {
+        navigation.navigate('Detail', { incident });
     }
 
     async function loadIncidents() {
-        const response = await api.get('incidents');
-        setIncidents(response.data);
+        if (loading) {
+            return;
+        }
+
+        if (total > 0 && incidents.length == total){
+            return;
+        }
+
+        setLoading(true);
+        
+        const response = await api.get('incidents', { params: { page } });
+        setIncidents([ ... incidents, ... response.data]); /* anexa dois vetores (concatena os casos listados) */
         setTotal(response.headers['x-total-count']);
+
+        setPage(page + 1);
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -43,10 +60,11 @@ export default function Incidents() {
                 style={styles.incidentList}
                 keyExtractor={incident => String(incident.id)}
                 showsVerticalScrollIndicator={false}
+                onEndReached={loadIncidents}
                 renderItem={({ item: incident }) => (
                    <View style={styles.incident}>
-                    <Text style={styles.incidentProperty}>ONG:</Text>
-                    <Text style={styles.incidentValue}>{incident.name}</Text>
+                    <Text style={styles.incidentProperty}>ONG: {incident.name}</Text>
+                    <Text style={styles.incidentValue}>{incident.city} - {incident.uf}</Text>
 
                     <Text style={styles.incidentProperty}>Caso:</Text>
                     <Text style={styles.incidentValue}>{incident.title}</Text>
@@ -56,7 +74,7 @@ export default function Incidents() {
 
                     <TouchableOpacity
                         style={styles.detailsButton}
-                        onPress={navigationToDetail}
+                        onPress={() => navigationToDetail(incident)} /*sempre que for passar parametros para uma funcao, ela tem que ser escrita como uma arrow function () => function())*/
                     >
                         <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
                         <Feather name="arrow-right" size={16} color='#e02041' />
